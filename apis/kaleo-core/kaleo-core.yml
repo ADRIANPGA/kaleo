@@ -1,0 +1,170 @@
+openapi: 3.1.0
+info:
+  title: Kaleo API
+  version: '1.0.0'
+  description: API Backend para control nutricional y calórico. Incluye login básico, SSO Google/Microsoft y perfil de usuario.
+servers:
+  - url: https://api.nutritrack.io/v1
+
+paths:
+  /auth/login:
+    post:
+      summary: Login tradicional con usuario/contraseña
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/LoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/oauth/google:
+    post:
+      summary: Login con token de Google
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OAuthTokenRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/LoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /auth/oauth/microsoft:
+    post:
+      summary: Login con token de Microsoft
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OAuthTokenRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/LoginResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /users/me:
+    get:
+      summary: Perfil del usuario autenticado
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/UserProfileResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      $ref: '../common/security.yml#/components/securitySchemes/BearerAuth'
+
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+
+    OAuthTokenRequest:
+      type: object
+      required:
+        - token
+      properties:
+        token:
+          type: string
+          description: Token de acceso de Google o Microsoft.
+
+    LoginResponseBody:
+      type: object
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+          example: Bearer
+        expires_in:
+          type: integer
+          example: 3600
+        refresh_token:
+          type: string
+          nullable: true
+
+    UserProfile:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        auth_provider:
+          type: string
+          enum: [local, google, microsoft]
+
+  responses:
+    LoginResponse:
+      description: Login exitoso
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/LoginResponseBody'
+
+    UserProfileResponse:
+      description: Perfil del usuario
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserProfile'
+
+    BadRequest:
+      $ref: '../common/default.yml#/components/responses/BadRequest'
+    
+    Unauthorized:
+      $ref: '../common/default.yml#/components/responses/Unauthorized'
+    
+    Forbidden:
+      $ref: '../common/default.yml#/components/responses/Forbidden'
+    
+    NotFound:
+      $ref: '../common/default.yml#/components/responses/NotFound'
+    
+    InternalServerError:
+      $ref: '../common/default.yml#/components/responses/InternalServerError'

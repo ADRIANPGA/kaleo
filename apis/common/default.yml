@@ -1,0 +1,167 @@
+components:
+  parameters:
+    principal:
+      name: principal
+      in: path
+      required: true
+      description: The user to impersonate (email or id)
+      example: foo@mail.com
+      schema:
+        $ref: '#/components/schemas/Mail'
+    id:
+      name: id
+      in: path
+      required: true
+      description: An integer id
+      example: 1
+      schema:
+        $ref: '#/components/schemas/Id'
+    uuidOrKey:
+      name: uuidOrKey
+      in: path
+      required: true
+      description: The entity UUID or String key
+      example: 00000000-0000-0000-0000-000000000000
+      # Not using oneOf since it bugs the OpenApi Generator
+      schema:
+        $ref: '#/components/schemas/Key'
+    uuid:
+      name: uuid
+      in: path
+      required: true
+      description: The entity UUID
+      example: 00000000-0000-0000-0000-000000000000
+      schema:
+        $ref: '#/components/schemas/Uuid'
+    notificationKey:
+      name: notificationKey
+      in: path
+      required: true
+      description: The notification Key
+      example: TEAM_KEY
+      schema:
+        $ref: '#/components/schemas/Key'
+    subscriptionKey:
+      name: subscriptionKey
+      in: path
+      required: true
+      description: The subscription Key
+      example: TEAM_KEY
+      schema:
+        $ref: '#/components/schemas/Key'
+    tenantKey:
+      name: tenantKey
+      in: path
+      required: true
+      description: The tenant Key
+      example: TEAM_KEY
+      schema:
+        $ref: '#/components/schemas/Key'
+    search:
+      name: search
+      in: query
+      description: Search string to filter results by key
+      required: false
+      example: TEAM_KEY
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 2147483647  # Maximum value for 32-bit integer
+  schemas:
+    Id:
+      type: integer
+      format: int32
+      example: 1
+      minimum: 1
+      maximum: 2147483647  # Maximum value for 32-bit integer
+    Key:
+      type: string
+      example: KEY
+      maxLength: 2147483647  # Maximum value for 32-bit integer
+    Uuid:
+      type: string
+      format: uuid
+      example: 00000000-0000-0000-0000-000000000000
+    Mail:
+      type: string
+      format: email
+      example: foo@mail.com
+      maxLength: 2147483647  # Maximum value for 32-bit integer
+    DefaultErrorResponse:
+      type: object
+      properties:
+        title:
+          type: string
+          maxLength: 2147483647  # Maximum value for 32-bit integer
+          example: 'No notification found for your type'
+        status:
+          type: integer
+          minimum: 200
+          maximum: 599
+          example: 400
+        detail:
+          type: string
+          maxLength: 2147483647  # Maximum value for 32-bit integer
+          example: 'Additional details about the error'
+        type:
+          type: string
+          maxLength: 2147483647  # Maximum value for 32-bit integer
+          example: 'https://example.com/docs/errors/notification-error'
+        instance:
+          type: string
+          maxLength: 2147483647  # Maximum value for 32-bit integer
+          example: '/hermes/v1/notification/send'
+        message:
+          type: string
+          maxLength: 2147483647  # Maximum value for 32-bit integer
+          example: 'Unauthorized'
+      additionalProperties: true
+  responses:
+    # 400 Bad Request - The server cannot process the request due to client error
+    BadRequest:
+      description: The server cannot process the request due to client error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DefaultErrorResponse'
+    # 401 Unauthorized - Authentication is required or has failed
+    Unauthorized:
+      description: Authentication is required or has failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DefaultErrorResponse'
+    # 403 Forbidden - Server understood the request but refuses to authorize it
+    Forbidden:
+      description: Server understood the request but refuses to authorize it
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DefaultErrorResponse'
+    # 404 Not Found - The requested resource could not be found
+    NotFound:
+      description: The requested resource could not be found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DefaultErrorResponse'
+    # 409 Conflict - Request conflicts with current state of the server
+    Conflict:
+      description: Request conflicts with current state of the server
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DefaultErrorResponse'
+    # 500 Internal Server Error - Server encountered an unexpected condition
+    InternalServerError:
+      description: Server encountered an unexpected condition
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/DefaultErrorResponse'
+    # 503 Service Unavailable - Server is temporarily unable to handle the request
+    ServiceUnavailable:
+      description: Server is temporarily unable to handle the request
+    # 504 Gateway Timeout - Server acting as a gateway did not receive a timely response
+    GatewayTimeout:
+      description: Server acting as a gateway did not receive a timely response
