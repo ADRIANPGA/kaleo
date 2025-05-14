@@ -1,10 +1,10 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Dialog, DialogContent } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Chrome } from "lucide-react"
+import { Chrome, Mail } from "lucide-react"
 import { signIn } from "next-auth/react"
 import { useRouter } from "next/navigation"
 
@@ -66,9 +66,38 @@ export function LoginModal({ isOpen, onClose, onSuccess }: LoginModalProps) {
     }
   }
 
+  const handleGoogleLogin = async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const result = await signIn("google", {
+        redirect: false,
+      })
+      
+      if (result?.error) {
+        if (result.error === "access_denied") {
+          setError("Google sign in was cancelled. Please try again if you wish to continue.")
+        } else {
+          setError(result.error)
+        }
+      } else if (result?.url) {
+        // Redirect to the Google login page
+        router.push(result.url)
+      }
+    } catch (error) {
+      setError("An error occurred during Google sign in")
+      console.error(error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="sr-only">Sign in to Kaleo</DialogTitle>
+        </DialogHeader>
         <Card className="border-0 shadow-none">
           <CardHeader className="space-y-2 text-center">
             <div className="mx-auto h-12 w-12 rounded-full bg-gradient-to-br from-green-400 to-green-600"></div>
@@ -116,15 +145,26 @@ export function LoginModal({ isOpen, onClose, onSuccess }: LoginModalProps) {
                 <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
               </div>
             </div>
-            <Button 
-              variant="outline" 
-              className="w-full justify-start gap-2" 
-              disabled={isLoading}
-              onClick={handleMicrosoftLogin}
-            >
-              <Chrome className="h-5 w-5" />
-              Sign in with Microsoft
-            </Button>
+            <div className="space-y-2">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start gap-2" 
+                disabled={isLoading}
+                onClick={handleMicrosoftLogin}
+              >
+                <Chrome className="h-5 w-5" />
+                Sign in with Microsoft
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full justify-start gap-2" 
+                disabled={isLoading}
+                onClick={handleGoogleLogin}
+              >
+                <Mail className="h-5 w-5" />
+                Sign in with Google
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </DialogContent>

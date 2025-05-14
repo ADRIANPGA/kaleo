@@ -1,48 +1,44 @@
 import NextAuth from "next-auth"
+import GoogleProvider from "next-auth/providers/google"
 import AzureADProvider from "next-auth/providers/azure-ad"
 
 const handler = NextAuth({
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
     AzureADProvider({
       clientId: process.env.AZURE_AD_CLIENT_ID!,
       clientSecret: process.env.AZURE_AD_CLIENT_SECRET!,
       tenantId: process.env.AZURE_AD_TENANT_ID,
-      authorization: {
-        params: {
-          scope: "openid profile email offline_access",
-        },
-      },
-      profile(profile) {
-        return {
-          id: profile.sub,
-          name: profile.name,
-          email: profile.email,
-          image: null,
-        }
-      },
     }),
   ],
+  pages: {
+    signIn: '/auth/signin',
+    error: '/auth/error',
+  },
   callbacks: {
-    async jwt({ token, account, profile }) {
-      if (account) {
-        token.accessToken = account.access_token
-        token.id = profile?.sub
+    async session({ session, token }) {
+      return session
+    },
+    async jwt({ token, user, account }) {
+      if (account && user) {
+        return {
+          ...token,
+          accessToken: account.access_token,
+        }
       }
       return token
     },
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string
+  },
+  logger: {
+    error(code, metadata) {
+      if (code !== 'OAUTH_CALLBACK_ERROR' || metadata?.error?.message !== 'access_denied') {
+        console.error(code, metadata)
       }
-      session.accessToken = token.accessToken
-      return session
     },
   },
-  pages: {
-    signIn: "/login",
-    error: "/auth/error",
-  },
-  debug: process.env.NODE_ENV === "development",
 })
 
 export { handler as GET, handler as POST } 
