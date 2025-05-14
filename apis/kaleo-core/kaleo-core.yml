@@ -20,11 +20,23 @@ paths:
         '200':
           $ref: '#/components/responses/LoginResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          description: The server cannot process the request due to client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultErrorResponse'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          description: Authentication is required or has failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultErrorResponse'
         '500':
-          $ref: '#/components/responses/InternalServerError'
+          description: Server encountered an unexpected condition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultErrorResponse'
 
   /auth/oauth/google:
     post:
@@ -39,11 +51,23 @@ paths:
         '200':
           $ref: '#/components/responses/LoginResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          description: The server cannot process the request due to client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultErrorResponse'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          description: Authentication is required or has failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultErrorResponse'
         '500':
-          $ref: '#/components/responses/InternalServerError'
+          description: Server encountered an unexpected condition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultErrorResponse'
 
   /auth/oauth/microsoft:
     post:
@@ -58,11 +82,23 @@ paths:
         '200':
           $ref: '#/components/responses/LoginResponse'
         '400':
-          $ref: '#/components/responses/BadRequest'
+          description: The server cannot process the request due to client error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultErrorResponse'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          description: Authentication is required or has failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultErrorResponse'
         '500':
-          $ref: '#/components/responses/InternalServerError'
+          description: Server encountered an unexpected condition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultErrorResponse'
 
   /users/me:
     get:
@@ -73,13 +109,29 @@ paths:
         '200':
           $ref: '#/components/responses/UserProfileResponse'
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          description: Authentication is required or has failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultErrorResponse'
         '403':
-          $ref: '#/components/responses/Forbidden'
+          description: Server understood the request but refuses to authorize it
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultErrorResponse'
         '404':
-          $ref: '#/components/responses/NotFound'
+          description: The requested resource could not be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultErrorResponse'
         '500':
-          $ref: '#/components/responses/InternalServerError'
+          description: Server encountered an unexpected condition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultErrorResponse'
 
 components:
   securitySchemes:
@@ -139,6 +191,9 @@ components:
           type: string
           enum: [local, google, microsoft]
 
+    DefaultErrorResponse:
+      $ref: '../common/default.yml#/components/schemas/DefaultErrorResponse'
+
   responses:
     LoginResponse:
       description: Login exitoso
@@ -153,18 +208,3 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/UserProfile'
-
-    BadRequest:
-      $ref: '../common/default.yml#/components/responses/BadRequest'
-    
-    Unauthorized:
-      $ref: '../common/default.yml#/components/responses/Unauthorized'
-    
-    Forbidden:
-      $ref: '../common/default.yml#/components/responses/Forbidden'
-    
-    NotFound:
-      $ref: '../common/default.yml#/components/responses/NotFound'
-    
-    InternalServerError:
-      $ref: '../common/default.yml#/components/responses/InternalServerError'

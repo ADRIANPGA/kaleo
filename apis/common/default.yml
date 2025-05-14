@@ -110,7 +110,7 @@ components:
         instance:
           type: string
           maxLength: 2147483647  # Maximum value for 32-bit integer
-          example: '/hermes/v1/notification/send'
+          example: '/kaleo/v1/notification/send'
         message:
           type: string
           maxLength: 2147483647  # Maximum value for 32-bit integer
