@@ -1,5 +1,9 @@
- 
 FROM postgres:17
+
+# ensure all scripts are LF
+RUN apt-get update \
+  && apt-get install -y dos2unix \
+  && dos2unix /usr/local/bin/docker-entrypoint.sh
 
 # Install necessary packages
 RUN apt-get update && \
