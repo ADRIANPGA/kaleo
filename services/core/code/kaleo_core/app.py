@@ -5,16 +5,16 @@ from .config import settings
 from .logging import logger
 
 # Import your API implementation modules to ensure subclass registration
-from .api.v1 import init, users 
+from .api.v1 import login, register, users 
 
-# Import the auto-generated router
-from kaleo_core_api_server.apis.default_api import router as default_api_router
+# Import the auto-generated base classes and router
+from kaleo_core_api_server.apis.login_api import router as LoginApiRouter
+from kaleo_core_api_server.apis.register_api import router as RegisterApiRouter
+from kaleo_core_api_server.apis.users_api import router as UsersApiRouter
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting up Kaleo Core service")
-    # Ensure API implementations are loaded (already done by top-level imports)
-    logger.info(f"BaseDefaultApi subclasses: {users.BaseDefaultApi.subclasses}") 
     yield
     logger.info("Shutting down Kaleo Core service")
 
@@ -24,6 +24,9 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan
 )
+app.include_router(LoginApiRouter)
+app.include_router(RegisterApiRouter)
+app.include_router(UsersApiRouter)
 
 # Add CORS middleware
 app.add_middleware(
@@ -34,12 +37,4 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include the auto-generated default API router
-# This router will use the implementations from .api.v1.users (and others)
-app.include_router(default_api_router) # You might want a prefix, e.g., prefix="/api/v1_generated"
-
-# Remove or comment out the old router inclusions if they are no longer needed:
-# app.include_router(init.router, prefix="/api/v1", tags=["init"])
-# app.include_router(users.router, prefix="/api/v1", tags=["users"])
-
-logger.info("Kaleo Core FastAPI app configured.") 
+logger.info("Kaleo Core FastAPI app configured with refactored API structure.") 

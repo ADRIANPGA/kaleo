@@ -1,0 +1,19 @@
+post:
+  summary: Login con token de Google
+  tags:
+    - login
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas.yml#/components/schemas/OAuthTokenRequest'
+  responses:
+    '200':
+      $ref: '../../components/responses.yml#/components/responses/LoginResponse'
+    '400':
+      $ref: '../../../common/default.yml#/components/responses/BadRequest'
+    '401':
+      $ref: '../../../common/default.yml#/components/responses/Unauthorized'
+    '500':
+      $ref: '../../../common/default.yml#/components/responses/InternalServerError' 

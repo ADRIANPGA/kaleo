@@ -1,0 +1,23 @@
+post:
+  summary: User registration with email and password
+  tags:
+    - register
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          $ref: '../../components/schemas.yml#/components/schemas/RegisterRequest' # Reuses LoginRequest for registration
+  responses:
+    '201':
+      description: User registered successfully
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas.yml#/components/schemas/LoginResponseBody' # Assuming LoginResponseBody is what we want for successful registration
+    '400':
+      $ref: '../../../common/default.yml#/components/responses/BadRequest'
+    '409':
+      $ref: '../../../common/default.yml#/components/responses/Conflict'
+    '500':
+      $ref: '../../../common/default.yml#/components/responses/InternalServerError' 

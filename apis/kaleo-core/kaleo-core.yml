@@ -3,208 +3,62 @@ info:
   title: Kaleo API
   version: '1.0.0'
   description: API Backend para control nutricional y calórico. Incluye login básico, SSO Google/Microsoft y perfil de usuario.
-servers:
-  - url: https://api.nutritrack.io/v1
+  
+
+tags:
+  - name: login
+    description: Operations related to user authentication and login.
+  - name: register
+    description: Operations related to new user registration.
+  - name: users
+    description: Operations related to user profiles and management.
 
 paths:
-  /auth/login:
-    post:
-      summary: Login tradicional con usuario/contraseña
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LoginRequest'
-      responses:
-        '200':
-          $ref: '#/components/responses/LoginResponse'
-        '400':
-          description: The server cannot process the request due to client error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DefaultErrorResponse'
-        '401':
-          description: Authentication is required or has failed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DefaultErrorResponse'
-        '500':
-          description: Server encountered an unexpected condition
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DefaultErrorResponse'
+  # Auth paths
+  "/api/v1/auth/login":
+    $ref: './paths/auth/login.yml'
+  "/api/v1/auth/register":
+    $ref: './paths/auth/register.yml'
+  "/api/v1/auth/oauth/google":
+    $ref: './paths/auth/google.yml'
+  "/api/v1/auth/oauth/microsoft":
+    $ref: './paths/auth/microsoft.yml'
 
-  /auth/oauth/google:
-    post:
-      summary: Login con token de Google
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OAuthTokenRequest'
-      responses:
-        '200':
-          $ref: '#/components/responses/LoginResponse'
-        '400':
-          description: The server cannot process the request due to client error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DefaultErrorResponse'
-        '401':
-          description: Authentication is required or has failed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DefaultErrorResponse'
-        '500':
-          description: Server encountered an unexpected condition
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DefaultErrorResponse'
-
-  /auth/oauth/microsoft:
-    post:
-      summary: Login con token de Microsoft
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OAuthTokenRequest'
-      responses:
-        '200':
-          $ref: '#/components/responses/LoginResponse'
-        '400':
-          description: The server cannot process the request due to client error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DefaultErrorResponse'
-        '401':
-          description: Authentication is required or has failed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DefaultErrorResponse'
-        '500':
-          description: Server encountered an unexpected condition
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DefaultErrorResponse'
-
-  /users/me:
-    get:
-      summary: Perfil del usuario autenticado
-      security:
-        - BearerAuth: []
-      responses:
-        '200':
-          $ref: '#/components/responses/UserProfileResponse'
-        '401':
-          description: Authentication is required or has failed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DefaultErrorResponse'
-        '403':
-          description: Server understood the request but refuses to authorize it
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DefaultErrorResponse'
-        '404':
-          description: The requested resource could not be found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DefaultErrorResponse'
-        '500':
-          description: Server encountered an unexpected condition
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DefaultErrorResponse'
+  # User paths
+  "/api/v1/users/me":
+    $ref: './paths/users.yml'
 
 components:
+  schemas:
+    LoginRequest:
+      $ref: './components/schemas.yml#/components/schemas/LoginRequest'
+    RegisterRequest:
+      $ref: './components/schemas.yml#/components/schemas/RegisterRequest'
+    LoginResponseBody:
+      $ref: './components/schemas.yml#/components/schemas/LoginResponseBody'
+    OAuthTokenRequest:
+      $ref: './components/schemas.yml#/components/schemas/OAuthTokenRequest'
+    UserProfile:
+      $ref: './components/schemas.yml#/components/schemas/UserProfile'
+    DefaultErrorResponse:
+      $ref: '../common/default.yml#/components/schemas/DefaultErrorResponse'
+  responses:
+    LoginResponse:
+      $ref: './components/responses.yml#/components/responses/LoginResponse'
+    UserProfileResponse:
+      $ref: './components/responses.yml#/components/responses/UserProfileResponse'
+    BadRequest:
+      $ref: '../common/default.yml#/components/responses/BadRequest'
+    Unauthorized:
+      $ref: '../common/default.yml#/components/responses/Unauthorized'
+    Forbidden:
+      $ref: '../common/default.yml#/components/responses/Forbidden'
+    NotFound:
+      $ref: '../common/default.yml#/components/responses/NotFound'
+    Conflict:
+      $ref: '../common/default.yml#/components/responses/Conflict'
+    InternalServerError:
+      $ref: '../common/default.yml#/components/responses/InternalServerError'
   securitySchemes:
     BearerAuth:
       $ref: '../common/security.yml#/components/securitySchemes/BearerAuth'
-
-  schemas:
-    LoginRequest:
-      type: object
-      required:
-        - email
-        - password
-      properties:
-        email:
-          type: string
-          format: email
-        password:
-          type: string
-          format: password
-
-    OAuthTokenRequest:
-      type: object
-      required:
-        - token
-      properties:
-        token:
-          type: string
-          description: Token de acceso de Google o Microsoft.
-
-    LoginResponseBody:
-      type: object
-      properties:
-        access_token:
-          type: string
-        token_type:
-          type: string
-          example: Bearer
-        expires_in:
-          type: integer
-          example: 3600
-        refresh_token:
-          type: string
-          nullable: true
-
-    UserProfile:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-        email:
-          type: string
-          format: email
-        name:
-          type: string
-        auth_provider:
-          type: string
-          enum: [local, google, microsoft]
-
-    DefaultErrorResponse:
-      $ref: '../common/default.yml#/components/schemas/DefaultErrorResponse'
-
-  responses:
-    LoginResponse:
-      description: Login exitoso
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/LoginResponseBody'
-
-    UserProfileResponse:
-      description: Perfil del usuario
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/UserProfile'

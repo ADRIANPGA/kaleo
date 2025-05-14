@@ -1,0 +1,15 @@
+components:
+  responses:
+    LoginResponse:
+      description: Login exitoso
+      content:
+        application/json:
+          schema:
+            $ref: './schemas.yml#/components/schemas/LoginResponseBody'
+
+    UserProfileResponse:
+      description: Perfil del usuario
+      content:
+        application/json:
+          schema:
+            $ref: './schemas.yml#/components/schemas/UserProfile' 

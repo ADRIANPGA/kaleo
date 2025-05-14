@@ -31,11 +31,30 @@ def bundle_api(api_name):
             "--outfile", str(output_file),
             "--type", "yaml"
         ]
-        subprocess.run(cmd, check=True)
-        print(f"Successfully bundled {api_name} to {output_file}")
-        return True
-    except subprocess.CalledProcessError as e:
-        print(f"Error bundling {api_name}: {e}")
+        # Run the command and capture output
+        result = subprocess.run(cmd, capture_output=True, text=True, check=False)
+
+        if result.returncode == 0:
+            print(f"Successfully bundled {api_name} to {output_file}")
+            if result.stdout:
+                print(f"swagger-cli stdout:\\n{result.stdout}")
+            if result.stderr: # Sometimes tools output warnings or other info to stderr even on success
+                print(f"swagger-cli stderr:\\n{result.stderr}")
+            return True
+        else:
+            print(f"Error bundling {api_name}.")
+            print(f"Command: {' '.join(cmd)}")
+            print(f"Return code: {result.returncode}")
+            if result.stdout:
+                print(f"swagger-cli stdout:\\n{result.stdout}")
+            if result.stderr:
+                print(f"swagger-cli stderr:\\n{result.stderr}")
+            return False
+    except FileNotFoundError:
+        print(f"Error: swagger-cli command not found. Please ensure it is installed and in your PATH.")
+        return False
+    except Exception as e: # Catch other potential exceptions during subprocess.run
+        print(f"An unexpected error occurred while trying to bundle {api_name}: {e}")
         return False
 
 def get_available_apis():

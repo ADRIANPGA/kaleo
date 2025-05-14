@@ -14,7 +14,9 @@
 
 from fastapi import FastAPI
 
-from kaleo_core_api_server.apis.default_api import router as DefaultApiRouter
+from kaleo_core_api_server.apis.login_api import router as LoginApiRouter
+from kaleo_core_api_server.apis.register_api import router as RegisterApiRouter
+from kaleo_core_api_server.apis.users_api import router as UsersApiRouter
 
 app = FastAPI(
     title="Kaleo API",
@@ -22,4 +24,6 @@ app = FastAPI(
     version="1.0.0",
 )
 
-app.include_router(DefaultApiRouter)
+app.include_router(LoginApiRouter)
+app.include_router(RegisterApiRouter)
+app.include_router(UsersApiRouter)

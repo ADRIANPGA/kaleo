@@ -6,6 +6,7 @@ import os
 import shutil
 import subprocess
 import sys
+import re
 from enum import Enum
 from pathlib import Path
 from typing import Dict, Optional, Literal
@@ -204,6 +205,17 @@ def generate_with_openapi(
                     # Format the replacement with the actual package name
                     formatted_new = new.format(package_name=package_name)
                     content = content.replace(old, formatted_new)
+
+                # Replace 'from <package>.models.object import object' with 'from pydantic import BaseModel'
+                # and update class inheritance to BaseModel for generated models.
+                content = re.sub(r"from\s+[\w.]+\.models\.object\s+import\s+object",
+                                 "from pydantic import BaseModel",
+                                 content)
+
+                content = re.sub(r"class\s+(\w+)\(object\):",
+                                 "class \\1(BaseModel):",
+                                 content)
+
                 with open(file_path, 'w') as f:
                     f.write(content)
 
@@ -215,6 +227,16 @@ def generate_with_openapi(
     # Clean up temporary folder
     logger.info(f"Cleaning up temporary folder {output_folder}")
     shutil.rmtree(output_folder)
+
+    # Delete openapitools.json from the script's directory
+    openapitools_json_path = Path(__file__).parent / "openapitools.json"
+    if openapitools_json_path.exists():
+        try:
+            os.remove(openapitools_json_path)
+            logger.info(f"Successfully deleted {openapitools_json_path}")
+        except OSError as e:
+            logger.error(f"Error deleting {openapitools_json_path}: {e}")
+            
     return True
 
 def generate_with_orval(
