@@ -1,4 +1,4 @@
-name: kaleo-dev
+version: '3.8'
 
 services:
   pgdb:
