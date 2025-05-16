@@ -1,16 +1,16 @@
 # Database Configuration
-database_url: "postgresql+asyncpg://user:password@localhost/dbname"
-db_echo: false
+database_url: "${DATABASE_URL}"
+db_echo: ${DB_ECHO:-false}
 
 # JWT Configuration
-jwt_secret_key: "your-secure-key-here"
-jwt_algorithm: "HS256"
-access_token_expire_minutes: 15
+jwt_secret_key: "${JWT_SECRET_KEY}"
+jwt_algorithm: "${JWT_ALGORITHM:-HS256}"
+access_token_expire_minutes: ${ACCESS_TOKEN_EXPIRE_MINUTES:-15}
 
 # Service Configuration
-core_service_url: "http://localhost:8000"
+core_service_url: "${CORE_SERVICE_URL:-http://localhost:8000}"
 
 # Logging Configuration
-log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
-log_format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-log_file: "logs/kaleo_core.log"  # Set to null for console-only logging 
+log_level: "${LOG_LEVEL:-INFO}"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+log_format: "${LOG_FORMAT:-%(asctime)s - %(name)s - %(levelname)s - %(message)s}"
+log_file: "${LOG_FILE:-logs/kaleo_core.log}"  # Set to null for console-only logging 

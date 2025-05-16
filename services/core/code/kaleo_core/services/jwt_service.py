@@ -1,5 +1,5 @@
-from datetime import timedelta # Keep for timedelta if create_access_token logic moves here
-from typing import Dict, Optional
+from datetime import timedelta, datetime, timezone
+from typing import Dict, Optional, Tuple
 
 from jose import JWTError, jwt
 from fastapi import HTTPException, status
@@ -15,31 +15,48 @@ class JWTService:
         self.algorithm = algorithm
 
     def create_access_token(self, data: Dict, expires_delta: Optional[timedelta] = None) -> str:
-        # This method can either reimplement token creation or call the existing one.
-        # For now, let's assume it calls the existing one from middleware for consistency
-        # until a full refactor of that middleware piece.
-        # If expires_delta is not None, it would be passed to auth_create_access_token if it supports it,
-        # or the logic in auth_create_access_token uses settings.ACCESS_TOKEN_EXPIRE_MINUTES.
-        return auth_create_access_token(data=data, expires_delta=expires_delta)
+        to_encode = data.copy()
+        if expires_delta:
+            expire = datetime.now(timezone.utc) + expires_delta
+        else:
+            expire = datetime.now(timezone.utc) + timedelta(minutes=settings.access_token_expire_minutes)
+        to_encode.update({"exp": expire, "type": "access"})
+        return jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
 
-    async def decode_access_token(self, token: str) -> Optional[Dict]:
+    def create_refresh_token(self, data: Dict) -> str:
+        to_encode = data.copy()
+        expire = datetime.now(timezone.utc) + timedelta(days=settings.refresh_token_expire_days)
+        to_encode.update({"exp": expire, "type": "refresh"})
+        return jwt.encode(to_encode, self.secret_key, algorithm=self.algorithm)
+
+    def create_token_pair(self, data: Dict) -> Tuple[str, str]:
+        """Create both access and refresh tokens"""
+        access_token = self.create_access_token(data)
+        refresh_token = self.create_refresh_token(data)
+        return access_token, refresh_token
+
+    async def decode_token(self, token: str, verify_type: Optional[str] = None) -> Optional[Dict]:
+        """Decode and verify a token, optionally checking its type"""
         try:
             payload = jwt.decode(token, self.secret_key, algorithms=[self.algorithm])
+            if verify_type and payload.get("type") != verify_type:
+                return None
             return payload
         except JWTError:
-            # Specific errors like ExpiredSignatureError, JWTClaimsError can be caught too
-            # For now, a general JWTError is caught.
-            # The calling code should handle the None return and raise appropriate HTTPExceptions.
             return None
-    
+
+    async def verify_refresh_token(self, token: str) -> Optional[Dict]:
+        """Specifically verify a refresh token"""
+        return await self.decode_token(token, verify_type="refresh")
+
     async def get_user_id_from_token(self, token: str) -> Optional[str]:
-        payload = await self.decode_access_token(token)
+        payload = await self.decode_token(token)
         if payload:
-            return payload.get("user_id") # Assumes 'user_id' is in the token payload
+            return payload.get("user_id")
         return None
 
 # Dependency to get JWTService instance
 async def get_jwt_service():
-    return JWTService(secret_key=settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    return JWTService(secret_key=settings.jwt_secret_key, algorithm=settings.jwt_algorithm)
 
 print("kaleo_core.services.jwt_service created.") 

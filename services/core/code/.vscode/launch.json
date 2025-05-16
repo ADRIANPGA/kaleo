@@ -1,0 +1,28 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.1.0",
+    "configurations": [
+        {
+            "name": "Debug (Devtunnel)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "poetry",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "args": ["run", "app-start-lt"],
+            "subProcess": true
+        },
+        {
+            "name": "Debug",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "poetry",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "args": ["run", "app-start"],
+            "subProcess": true
+        }
+    ]
+}

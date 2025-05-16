@@ -1,22 +1,27 @@
-from sqlalchemy import text, Enum
+from sqlalchemy import String, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime
-from .auth_provider_type_enum import AuthProviderType
-from .base import Base
+from typing import Optional, List
+import uuid
+
+from ..database import Base
+from .auth_provider_type_enum import AuthProviderType, AuthProviderTypeEnum
+from .tenant import user_tenants, Tenant
+from .user_google_details import UserGoogleDetails
+from .user_microsoft_details import UserMicrosoftDetails
 
 class User(Base):
-    __tablename__ = 'users'
-    __table_args__ = {'comment': 'Stores user account information'}
+    __tablename__ = "users"
 
-    id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, server_default=text('gen_random_uuid()'), comment='Unique identifier for the user')
-    email: Mapped[str] = mapped_column(unique=True, nullable=False, comment='User email address (unique)')
-    name: Mapped[str | None] = mapped_column(comment='User display name')
-    auth_provider: Mapped[AuthProviderType] = mapped_column(Enum(AuthProviderType, name='auth_provider_type'), nullable=False, comment='Authentication provider (local, google, or microsoft)')
-    password_hash: Mapped[str | None] = mapped_column(comment='Hashed password (only for local authentication)')
-    created_at: Mapped[datetime] = mapped_column(server_default=text('now()'), comment='Timestamp when the user was created')
-    updated_at: Mapped[datetime] = mapped_column(server_default=text('now()'), comment='Timestamp when the user was last updated')
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    email: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    auth_provider: Mapped[AuthProviderType] = mapped_column(AuthProviderTypeEnum, nullable=False)
+    password_hash: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    google_details = relationship("UserGoogleDetails", back_populates="user", cascade="all, delete-orphan", uselist=False)
-    microsoft_details = relationship("UserMicrosoftDetails", back_populates="user", cascade="all, delete-orphan", uselist=False)
-    tenants = relationship("UserTenant", back_populates="user", cascade="all, delete-orphan")
+    # Relationships
+    google_details = relationship("UserGoogleDetails", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    microsoft_details = relationship("UserMicrosoftDetails", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    tenants: Mapped[List[Tenant]] = relationship(secondary=user_tenants, back_populates="users")

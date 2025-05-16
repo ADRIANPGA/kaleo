@@ -1,18 +1,28 @@
-from sqlalchemy import text, Enum
+from sqlalchemy import String, DateTime, Table, Column, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime
-from .auth_provider_type_enum import AuthProviderType
-from .base import Base
+from typing import Optional, List
+import uuid
+
+from ..database import Base
+from .auth_provider_type_enum import AuthProviderType, AuthProviderTypeEnum
+
+# Association table for user-tenant relationship
+user_tenants = Table(
+    "user_tenants",
+    Base.metadata,
+    Column("user_id", ForeignKey("users.id", ondelete="CASCADE"), primary_key=True),
+    Column("tenant_id", ForeignKey("tenants.id", ondelete="CASCADE"), primary_key=True)
+)
 
 class Tenant(Base):
-    __tablename__ = 'tenants'
-    __table_args__ = {'comment': 'Stores tenant information for multi-tenant support'}
+    __tablename__ = "tenants"
 
-    id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, server_default=text('gen_random_uuid()'), comment='Unique identifier for the tenant')
-    name: Mapped[str] = mapped_column(nullable=False, comment='Display name of the tenant')
-    external_id: Mapped[str | None] = mapped_column(unique=True, comment='External tenant identifier (Google Workspace domain or Azure Tenant ID)')
-    provider: Mapped[AuthProviderType] = mapped_column(Enum(AuthProviderType, name='auth_provider_type'), nullable=False, comment='Authentication provider for this tenant')
-    created_at: Mapped[datetime] = mapped_column(server_default=text('now()'), comment='Timestamp when the tenant was created')
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    external_id: Mapped[Optional[str]] = mapped_column(String, unique=True, nullable=True)
+    provider: Mapped[AuthProviderType] = mapped_column(AuthProviderTypeEnum, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=datetime.utcnow)
 
-    users = relationship("UserTenant", back_populates="tenant", cascade="all, delete-orphan")
+    # Relationship to users through the association table
+    users = relationship("User", secondary=user_tenants, back_populates="tenants")

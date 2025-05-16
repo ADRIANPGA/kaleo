@@ -48,10 +48,8 @@ for _, name, _ in pkgutil.iter_modules(ns_pkg.__path__, ns_pkg.__name__ + "."):
     response_model_by_alias=True,
 )
 async def api_v1_users_me_get(
-    token_BearerAuth: TokenModel = Security(
-        get_token_BearerAuth
-    ),
+    token_BearerAuth: TokenModel = Security(get_token_BearerAuth)
 ) -> UserProfile:
     if not BaseUsersApi.subclasses:
         raise HTTPException(status_code=500, detail="Not implemented")
-    return await BaseUsersApi.subclasses[0]().api_v1_users_me_get()
+    return await BaseUsersApi.subclasses[0]().api_v1_users_me_get(token_BearerAuth)

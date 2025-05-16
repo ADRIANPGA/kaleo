@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from typing import Optional, Dict
+from datetime import datetime, timezone
 
 from ..db.models.user import User
 from ..db.models.auth_provider_type_enum import AuthProviderType
@@ -28,25 +29,26 @@ class UserService:
         return result.scalar_one_or_none()
 
     async def create_user(
-        self, 
-        db: AsyncSession, 
-        email: str, 
-        auth_provider: AuthProviderType,
-        name: Optional[str] = None, 
-        password_hash: Optional[str] = None
+        self,
+        db: AsyncSession,
+        email: str,
+        password_hash: Optional[str] = None,
+        name: Optional[str] = None,
+        auth_provider: AuthProviderType = AuthProviderType.local,
     ) -> User:
-        # This method is now primarily for local user creation or foundational user record.
-        # OAuth user creation will be handled by more specific methods below.
-        new_user = User(
+        now = datetime.now(timezone.utc)
+        user = User(
             email=email,
             name=name,
+            password_hash=password_hash,
             auth_provider=auth_provider,
-            password_hash=password_hash
+            created_at=now,
+            updated_at=now
         )
-        db.add(new_user)
+        db.add(user)
         await db.commit()
-        await db.refresh(new_user)
-        return new_user
+        await db.refresh(user)
+        return user
 
     async def update_user_name(self, db: AsyncSession, user: User, name: str) -> User:
         if user.name != name:
@@ -68,7 +70,7 @@ class UserService:
     ) -> User:
         user = await self.get_user_by_email(db, email)
         if user:
-            if user.auth_provider != AuthProviderType.GOOGLE:
+            if user.auth_provider != AuthProviderType.google:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
                     detail=f"User with email {email} already exists with {user.auth_provider.value} authentication."
@@ -110,7 +112,7 @@ class UserService:
             user = User(
                 email=email,
                 name=name,
-                auth_provider=AuthProviderType.GOOGLE,
+                auth_provider=AuthProviderType.google,
                 google_details=UserGoogleDetails(
                     external_id=provider_user_id,
                     email_verified=email_verified,
@@ -132,11 +134,11 @@ class UserService:
         microsoft_tenant_id: Optional[str] = None,
         upn: Optional[str] = None,
         given_name: Optional[str] = None, # For UserMicrosoftDetails
-        family_name: Optional[str] = None # For UserMicrosoftDetails
+        family_name: Optional[str] = None, # For UserMicrosoftDetails
     ) -> User:
         user = await self.get_user_by_email(db, email)
         if user:
-            if user.auth_provider != AuthProviderType.MICROSOFT:
+            if user.auth_provider != AuthProviderType.microsoft:
                 raise HTTPException(
                     status_code=status.HTTP_409_CONFLICT,
                     detail=f"User with email {email} already exists with {user.auth_provider.value} authentication."
@@ -172,7 +174,7 @@ class UserService:
             user = User(
                 email=email,
                 name=name,
-                auth_provider=AuthProviderType.MICROSOFT,
+                auth_provider=AuthProviderType.microsoft,
                 microsoft_details=UserMicrosoftDetails(
                     external_id=provider_user_id,
                     tenant_id=microsoft_tenant_id,
@@ -187,7 +189,9 @@ class UserService:
         return user
 
 # To be used as a dependency in API routes if preferred, or instantiated directly
-async def get_user_service():
+def get_user_service() -> UserService:
+    """Get a UserService instance. This is synchronous because creating the service
+    doesn't involve any async operations. The service methods themselves are async."""
     return UserService()
 
 print("kaleo_core.services.user_service created.") 

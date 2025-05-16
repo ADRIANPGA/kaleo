@@ -1,16 +1,20 @@
+from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.dialects.postgresql import UUID
-from .base import Base
+from typing import Optional
+import uuid
+
+from ..database import Base
 
 class UserMicrosoftDetails(Base):
-    __tablename__ = 'user_microsoft_details'
+    __tablename__ = "user_microsoft_details"
     __table_args__ = {'comment': 'Stores additional details for users authenticated with Microsoft'}
 
-    user_id: Mapped[str] = mapped_column(UUID(as_uuid=True), primary_key=True, comment='Reference to the user account')
-    external_id: Mapped[str] = mapped_column(unique=True, nullable=False, comment='Microsoft user ID (oid claim in ID Token)')
-    tenant_id: Mapped[str | None] = mapped_column(comment='Azure tenant ID (important for multi-tenant)')
-    upn: Mapped[str | None] = mapped_column(comment='User Principal Name (typically email)')
-    given_name: Mapped[str | None] = mapped_column(comment='User first name')
-    family_name: Mapped[str | None] = mapped_column(comment='User last name')
+    user_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), primary_key=True)
+    external_id: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    tenant_id: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    upn: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    given_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
+    family_name: Mapped[Optional[str]] = mapped_column(String, nullable=True)
 
-    user = relationship("User", back_populates="microsoft_details", passive_deletes=True)
+    # Relationship back to user
+    user = relationship("User", back_populates="microsoft_details")
