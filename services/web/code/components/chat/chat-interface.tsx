@@ -7,8 +7,15 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { ChatMessage } from "./chat-message"
 
+type Message = {
+  id: number;
+  role: "assistant" | "user";
+  content: string;
+  timestamp: string;
+}
+
 // Mock chat data
-const initialMessages = [
+const initialMessages: Message[] = [
   {
     id: 1,
     role: "assistant",
@@ -37,14 +44,14 @@ const initialMessages = [
 ]
 
 export function ChatInterface() {
-  const [messages, setMessages] = useState(initialMessages)
+  const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [input, setInput] = useState("")
 
   const handleSendMessage = () => {
     if (!input.trim()) return
 
     // Add user message
-    const userMessage = {
+    const userMessage: Message = {
       id: messages.length + 1,
       role: "user",
       content: input,
@@ -56,7 +63,7 @@ export function ChatInterface() {
 
     // Simulate assistant response
     setTimeout(() => {
-      const assistantMessage = {
+      const assistantMessage: Message = {
         id: messages.length + 2,
         role: "assistant",
         content:

@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { BarChart3, MessageSquare, Utensils, User, LogOut, Settings, Moon, Sun, Laptop } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -80,6 +80,19 @@ export function Header() {
   const pathname = usePathname()
   const [activeItem, setActiveItem] = useState("")
   const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const ThemeIcon = mounted ? (
+    theme === "dark" ? <Moon className="h-5 w-5" /> : 
+    theme === "light" ? <Sun className="h-5 w-5" /> : 
+    <Laptop className="h-5 w-5" />
+  ) : (
+    <Sun className="h-5 w-5" />
+  )
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -135,7 +148,7 @@ export function Header() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8">
-                {theme === "dark" ? <Moon className="h-5 w-5" /> : theme === "light" ? <Sun className="h-5 w-5" /> : <Laptop className="h-5 w-5" />}
+                {ThemeIcon}
                 <span className="sr-only">Toggle theme</span>
               </Button>
             </DropdownMenuTrigger>

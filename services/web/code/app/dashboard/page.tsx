@@ -16,7 +16,7 @@ export default function DashboardPage() {
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-base">Calories Today</CardTitle>
-            <CardDescription>1,850 / 2,200 kcal</CardDescription>
+            <CardDescription>1,850 / 2,000 kcal</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-bold">1,850</div>

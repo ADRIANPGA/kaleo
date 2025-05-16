@@ -81,16 +81,16 @@ function useFloatingEmojis() {
             const edge = Math.floor(Math.random() * 4);
             if (edge === 0) { // left
               x = -10; y = getRandom(0, 100);
-              speedX = getRandom(0.1, 0.5); speedY = getRandom(-0.1, 0.1);
+              speedX = getRandom(0.05, 0.1); speedY = getRandom(-0.05, 0.05);
             } else if (edge === 1) { // right
               x = 110; y = getRandom(0, 100);
-              speedX = -getRandom(0.1, 0.5); speedY = getRandom(-0.1, 0.1);
+              speedX = -getRandom(0.05, 0.1); speedY = getRandom(-0.05, 0.05);
             } else if (edge === 2) { // top
               x = getRandom(0, 100); y = -10;
-              speedX = getRandom(-0.1, 0.1); speedY = getRandom(0.1, 0.5);
+              speedX = getRandom(-0.05, 0.05); speedY = getRandom(0.05, 0.1);
             } else { // bottom
               x = getRandom(0, 100); y = 110;
-              speedX = getRandom(-0.1, 0.1); speedY = -getRandom(0.1, 0.5);
+              speedX = getRandom(-0.05, 0.05); speedY = -getRandom(0.05, 0.1);
             }
             emoji = getRandomEmoji();
             size = getRandom(2.5, 4.5);
@@ -113,16 +113,16 @@ function createEmojiConfig() {
   let x, y, speedX, speedY;
   if (edge === 0) { // left
     x = -10; y = getRandom(0, 100);
-    speedX = getRandom(0.1, 0.5); speedY = getRandom(-0.1, 0.1);
+    speedX = getRandom(0.05, 0.1); speedY = getRandom(-0.05, 0.05);
   } else if (edge === 1) { // right
     x = 110; y = getRandom(0, 100);
-    speedX = -getRandom(0.1, 0.5); speedY = getRandom(-0.1, 0.1);
+    speedX = -getRandom(0.05, 0.1); speedY = getRandom(-0.05, 0.05);
   } else if (edge === 2) { // top
     x = getRandom(0, 100); y = -10;
-    speedX = getRandom(-0.1, 0.1); speedY = getRandom(0.1, 0.5);
+    speedX = getRandom(-0.05, 0.05); speedY = getRandom(0.05, 0.1);
   } else { // bottom
     x = getRandom(0, 100); y = 110;
-    speedX = getRandom(-0.1, 0.1); speedY = -getRandom(0.1, 0.5);
+    speedX = getRandom(-0.05, 0.05); speedY = -getRandom(0.05, 0.1);
   }
   return {
     emoji: getRandomEmoji(),
@@ -164,9 +164,9 @@ export default function LandingPage() {
       if (!deleting) {
         if (charIndex < words[index].length) {
           setDisplay(words[index].slice(0, charIndex + 1));
-          timeout = setTimeout(() => setCharIndex((c) => c + 1), 120);
+          timeout = setTimeout(() => setCharIndex((c) => c + 1), 160);
         } else {
-          timeout = setTimeout(() => setDeleting(true), 1200);
+          timeout = setTimeout(() => setDeleting(true), 2000);
         }
       } else {
         if (charIndex > 0) {
@@ -227,7 +227,7 @@ export default function LandingPage() {
       </div>
       {/* Foreground content */}
       <div className="relative z-10 flex flex-col items-center justify-center w-full">
-        <h1 className="text-6xl md:text-8xl font-bold text-foreground mb-6 tracking-[-0.02em] text-center font-[var(--font-manrope)]">
+        <h1 className="text-6xl md:text-8xl font-bold text-foreground mb-6 tracking-[-0.02em] text-center font-heading">
           WELCOME TO KALEO
         </h1>
         <div className="text-3xl md:text-5xl font-medium h-20 text-center mb-4">
